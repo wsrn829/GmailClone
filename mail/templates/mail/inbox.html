@@ -2,34 +2,77 @@
 {% load static %}
 
 {% block body %}
-    <h2>{{ request.user.email }}</h2>
+<div class="container">
+  <div class="row align-items-center">
+      <div class="col-md-6">
+          <h2>{{ request.user.email }}</h2>
+      </div>
+      <div class="col-md-6">
+          <div class="btn-group" role="group" aria-label="Mailbox Navigation">
+              <button type="button" class="btn btn-outline-primary" id="inbox">Inbox</button>
+              <button type="button" class="btn btn-outline-primary" id="compose">Compose</button>
+              <button type="button" class="btn btn-outline-primary" id="sent">Sent</button>
+              <button type="button" class="btn btn-outline-primary" id="archived">Archived</button>
+              <a href="{% url 'logout' %}" class="btn btn-outline-primary">Log Out</a>
+          </div>
+      </div>
+  </div>
+</div>
+<hr>
 
-    <button class="btn btn-sm btn-outline-primary" id="inbox">Inbox</button>
-    <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
-    <button class="btn btn-sm btn-outline-primary" id="sent">Sent</button>
-    <button class="btn btn-sm btn-outline-primary" id="archived">Archived</button>
-    <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
-    <hr>
+<div id="emails-view" class="container mt-3">
+  <h4>This is emails</h4>
+</div>
 
-    <div id="emails-view">
-    </div>
+<div id="email-view" class="container mt-3">
+  <div class="card border-primary">
+      <div class="card-header bg-primary text-white">
+          <h5>Email Details</h5>
+      </div>
+      <div class="card-body">
+          <div class="row">
+              <div class="col-md-3 font-weight-bold">From:</div>
+              <div class="col-md-9" id="from"></div>
+          </div>
+          <div class="row">
+              <div class="col-md-3 font-weight-bold">To:</div>
+              <div class="col-md-9" id="to"></div>
+          </div>
+          <div class="row">
+              <div class="col-md-3 font-weight-bold">Subject:</div>
+              <div class="col-md-9" id="subject"></div>
+          </div>
+          <div class="row">
+              <div class="col-md-3 font-weight-bold">Received:</div>
+              <div class="col-md-9" id="date"></div>
+          </div>
+          <div class="row mt-3">
+              <div class="col-md-12 font-weight-bold">Email Body:</div>
+              <div class="col-md-12" id="emailBody"></div>
+          </div>
+          <button id="replyButton" class="btn btn-primary float-right mt-3">Reply</button>
+      </div>
+  </div>
+</div>
 
-    <div id="compose-view">
-        <h3>New Email</h3>
-        <form id="compose-form">
-            <div class="form-group">
-                From: <input disabled class="form-control" value="{{ request.user.email }}">
-            </div>
-            <div class="form-group">
-                To: <input id="compose-recipients" class="form-control">
-            </div>
-            <div class="form-group">
-                <input class="form-control" id="compose-subject" placeholder="Subject">
-            </div>
-            <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
-            <input type="submit" class="btn btn-primary"/>
-        </form>
-    </div>
+<div id="compose-view" class="container mt-3">
+  <h3>New Email</h3>
+  <form id="compose-form">
+      <div class="form-group">
+          <label for="compose-recipients">To:</label>
+          <input id="compose-recipients" name="recipients" class="form-control">
+      </div>
+      <div class="form-group">
+          <label for="compose-subject">Subject:</label>
+          <input class="form-control" id="compose-subject" name="subject" placeholder="Subject">
+      </div>
+      <div class="form-group">
+          <label for="compose-body">Body:</label>
+          <textarea class="form-control" id="compose-body" name="body" placeholder="Body"></textarea>
+      </div>
+      <input type="submit" class="btn btn-primary" value="Send">
+  </form>
+</div>
 {% endblock %}
 
 {% block script %}

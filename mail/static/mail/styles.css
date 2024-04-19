@@ -1,3 +1,26 @@
 textarea {
     min-height: 400px;
 }
+
+.email {
+    line-height: 30px;
+    padding: 10px;
+    padding-left: 25px;
+    margin: 20px;
+    text-align: left;
+    overflow: hidden;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.archive {
+    margin-right: 10px;
+}
+
+.read {
+    background-color: gray;
+}
+
+.unread {
+    background-color: white;
+}
