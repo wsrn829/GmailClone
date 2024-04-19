@@ -2,23 +2,63 @@ textarea {
     min-height: 400px;
 }
 
-.email {
-    line-height: 30px;
-    padding: 10px;
-    padding-left: 25px;
-    margin: 20px;
-    text-align: left;
-    overflow: hidden;
-    border: 2px solid black;
-    border-radius: 5px;
+#emails-view, #compose-view, #email-view {
+    display: none;
+    padding: 20px;
+  }
+
+.subject-title {
+font-size: 1.5em;
+font-weight: bold;
+margin-bottom: 10px;
 }
+
+.detailed-info {
+margin-bottom: 20px;
+}
+
+.detailed-info .text-muted {
+color: #6c757d;
+}
+
+.detailed-info .timestamp {
+float: right;
+}
+
+.star-icon {
+margin-left: 10px;
+color: #ffc107;
+}
+
+.body-section {
+white-space: pre-wrap;
+}
+
+.email-icon {
+    margin-right: 10px;
+  }
+
+.email-sender {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+.email-subject {
+    color: #555;
+    margin-right: 10px;
+  }
+
+.email-timestamp {
+    color: #999;
+    float: right;
+  }
 
 .archive {
     margin-right: 10px;
 }
 
 .read {
-    background-color: gray;
+    background-color: lightgray;
 }
 
 .unread {

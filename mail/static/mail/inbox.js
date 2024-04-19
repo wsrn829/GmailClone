@@ -194,23 +194,24 @@ async function load_mailbox(mailbox) {
     bodySection.innerText = emailData.body;
     bodySection.className = 'body-section';
 
-    const replyButton = createButton("<i class=\"fas fa-arrow-circle-left\" style='margin-right: 5px'></i>Reply", "email-btns btn btn-sm btn-outline-secondary", function(event) {
-        let subject = emailData.subject.startsWith("Re: ") ? emailData.subject : `Re: ${emailData.subject}`;
-        let body = `On ${emailData.timestamp} <${emailData.sender}> wrote:\n${emailData.body}\n--------\n`;
-        let recipient = emailData.sender;
-        compose_email(event, recipient, subject, body);
-    });
+    const { subject, timestamp, sender, body } = emailData;
 
-    emailView.innerHTML = "";
-    emailView.append(subjectTitle, detailedInfo, replyButton);
+const replyButton = createButton(`Reply`, "email-btns btn btn-sm btn-outline-secondary", function(event) {
+    let replySubject = subject.startsWith("Re: ") ? subject : `Re: ${subject}`;
+    let replyBody = `On ${timestamp} <${sender}> wrote:\n${body}\n-------------------------\n`;
+    compose_email(event, sender, replySubject, replyBody);
+});
+
+emailView.innerHTML = "";
+emailView.append(subjectTitle, detailedInfo, replyButton);
 
     if (fromMailbox === "inbox") {
-        const archiveButton = createButton("<i class=\"fas fa-archive\" style=\"margin-right: 5px\"></i>Archive", "email-btns btn btn-sm btn-outline-warning", function() {
+        const archiveButton = createButton(`Reply`, "email-btns btn btn-sm btn-outline-warning", function() {
             updateEmailState(emailData.id, {archived: true}, "inbox");
         });
         emailView.append(archiveButton);
     } else if (fromMailbox === "archive") {
-        const unarchiveButton = createButton("<i class=\"fas fa-inbox\" style=\"margin-right: 5px\"></i>Move to inbox", "email-btns btn btn-sm btn-outline-danger", function() {
+        const unarchiveButton = createButton("Move to inbox", "email-btns btn btn-sm btn-outline-danger", function() {
             updateEmailState(emailData.id, {archived: false}, "inbox");
         });
         emailView.append(unarchiveButton);
