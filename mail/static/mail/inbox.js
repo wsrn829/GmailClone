@@ -15,39 +15,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Use buttons to toggle between views
   inboxButton.addEventListener('click', () => load_mailbox('inbox'));
-  composeButton.addEventListener('click', compose_email);
   sentButton.addEventListener('click', () => load_mailbox('sent'));
   archivedButton.addEventListener('click', () => load_mailbox('archive'));
+  composeButton.addEventListener('click', compose_email);
 
-  // Actions when submitting compose email form
-  composeForm.onsubmit = async () => {
-    // retrieve data entered by the user
-    const recipients = document.querySelector('#compose-recipients').value
+  document.querySelector('#compose-form').onsubmit = function(event) {
+    event.preventDefault();
+
+    // Gather data from form
+    const recipients = document.querySelector('#compose-recipients').value;
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
 
-    // Send POST request to /emails
-    try {
-      const response = await fetch('/emails', {
-        method: 'POST',
-        body: JSON.stringify({recipients, subject, body})
-      });
-      const result = await response.json();
-      if (result.error) {
-        console.log(`${result.error}`);
-      } else {
-        load_mailbox('sent');
-      }
-    } catch (err) {
-      console.log(err);
-      // Display error message to user
-    }
+    // Send email
+    fetch('/emails', {
+      method: 'POST',
+      body: JSON.stringify({
+          recipients: recipients,
+          subject: subject,
+          body: body
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      // Print result
+      console.log(result);
 
-    return false;
-  }
-
-  // By default, load the inbox
-  load_mailbox('inbox');
+      // Load the sent mailbox
+      load_mailbox('sent');
+    });
+  };
+   // Load the inbox by default when the page loads
+   load_mailbox('inbox');
 });
 
 // Define compose_email function globally
@@ -180,7 +179,7 @@ async function load_mailbox(mailbox) {
     detailedInfo.innerHTML = `
         <div>
             <span class="text-muted">From: </span>${emailData.sender}
-            <span class="text-muted timestamp">${emailData.timestamp}<i class="far fa-star star-icon"></i></span>
+            <span class="text-muted timestamp">${emailData.timestamp}</span>
         </div>
         <div>
             <span class="text-muted">To: </span>${emailData.recipients.join()}
@@ -206,7 +205,7 @@ emailView.innerHTML = "";
 emailView.append(subjectTitle, detailedInfo, replyButton);
 
     if (fromMailbox === "inbox") {
-        const archiveButton = createButton(`Reply`, "email-btns btn btn-sm btn-outline-warning", function() {
+        const archiveButton = createButton(`Archive`, "email-btns btn btn-sm btn-outline-warning", function() {
             updateEmailState(emailData.id, {archived: true}, "inbox");
         });
         emailView.append(archiveButton);
