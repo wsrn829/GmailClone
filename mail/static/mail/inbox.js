@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
   archivedButton.addEventListener('click', () => load_mailbox('archive'));
   composeButton.addEventListener('click', compose_email);
 
-  document.querySelector('#compose-form').onsubmit = function(event) {
+  document.querySelector('#compose-form').onsubmit = async function(event) {
     event.preventDefault();
 
     // Gather data from form
@@ -27,27 +27,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
 
-    // Send email
-    fetch('/emails', {
+   // Send email
+   try {
+    const response = await fetch('/emails', {
       method: 'POST',
       body: JSON.stringify({
-          recipients: recipients,
-          subject: subject,
-          body: body
+        recipients: recipients,
+        subject: subject,
+        body: body
       })
-    })
-    .then(response => response.json())
-    .then(result => {
-      // Print result
-      console.log(result);
-
-      // Load the sent mailbox
-      load_mailbox('sent');
     });
-  };
+    const result = await response.json();
+
+    // Print result
+    console.log(result);
+
+    // Load the sent mailbox
+    load_mailbox('sent');
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
    // Load the inbox by default when the page loads
    load_mailbox('inbox');
-});
+
 
 // Define compose_email function globally
 function compose_email(event, recipients = '', subject = '', body = '') {
@@ -227,13 +231,17 @@ emailView.append(subjectTitle, detailedInfo, replyButton);
     return button;
   }
 
-  function updateEmailState(emailId, state, mailbox) {
-    fetch(`/emails/${emailId}`, {
+  async function updateEmailState(emailId, state, mailbox) {
+    try {
+      const response = await fetch(`/emails/${emailId}`, {
         method: 'PUT',
         body: JSON.stringify(state)
-    })
-    .then(response => {
-        console.log(`${response.status}`);
-        load_mailbox(mailbox);
-    });
+      });
+
+      console.log(`${response.status}`);
+      await load_mailbox(mailbox);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   }
+});
