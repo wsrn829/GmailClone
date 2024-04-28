@@ -197,62 +197,68 @@ async function load_mailbox(mailbox) {
   });
 }
 
-  function loadEmail(emailData, fromMailbox) {
-    const { subject, timestamp, sender, body, recipients, id } = emailData;
+// Define a function to create an element
+function createElement(type, textContent, className) {
+  const element = document.createElement(type);
+  element.textContent = textContent;
+  element.className = className;
+  return element;
+}
 
-    const emailsView = selectElement('emails-view');
-    const composeView = selectElement('compose-view');
-    const emailView = selectElement('email-view');
+function loadEmail(emailData, fromMailbox) {
+  const { subject, timestamp, sender, body, recipients, id } = emailData;
 
-    emailsView.style.display = 'none';
-    composeView.style.display = 'none';
-    emailView.style.display = 'block';
+  const emailsView = selectElement('emails-view');
+  const composeView = selectElement('compose-view');
+  const emailView = selectElement('email-view');
 
-    const subjectTitle = document.createElement("div");
-    subjectTitle.textContent = subject;
-    subjectTitle.className = 'subject-title';
+  emailsView.style.display = 'none';
+  composeView.style.display = 'none';
+  emailView.style.display = 'block';
 
-    const detailedInfo = document.createElement("div");
-    detailedInfo.className = 'detailed-info';
-    detailedInfo.innerHTML = `
-        <div>
-            <span class="text-muted">From: </span>${sender}
-            <span class="text-muted timestamp">${timestamp}</span>
-        </div>
-        <div>
-            <span class="text-muted">To: </span>${recipients.join()}
-        </div>
-        <div>
-            <span class="text-muted">Subject: </span>${subject}
-        </div>
-    `;
+  const elements = {
+    subjectTitle: createElement("div", subject, 'subject-title'),
+    detailedInfo: createElement("div", '', 'detailed-info'),
+    bodySection: createElement("div", body, 'body-section'),
+    replyButton: createButton(`Reply`, "email-btns btn btn-sm btn-outline-secondary", function(event) {
+      let replySubject = subject.startsWith("Re: ") ? subject : `Re: ${subject}`;
+      let replyBody = `On ${timestamp} <${sender}> wrote:\n${body}\n-------------------------\n`;
+      compose_email(event, sender, replySubject, replyBody);
+    })
+  };
 
-    const bodySection = document.createElement("div");
-    bodySection.textContent = body;
-    bodySection.className = 'body-section';
+  elements.detailedInfo.innerHTML = `
+    <div>
+      <span class="text-muted">From: </span>${sender}
+      <span class="text-muted timestamp">${timestamp}</span>
+    </div>
+    <div>
+      <span class="text-muted">To: </span>${recipients.join()}
+    </div>
+    <div>
+      <span class="text-muted">Subject: </span>${subject}
+    </div>
+  `;
 
-    const replyButton = createButton(`Reply`, "email-btns btn btn-sm btn-outline-secondary", function(event) {
-        let replySubject = subject.startsWith("Re: ") ? subject : `Re: ${subject}`;
-        let replyBody = `On ${timestamp} <${sender}> wrote:\n${body}\n-------------------------\n`;
-        compose_email(event, sender, replySubject, replyBody);
-    });
+  emailView.innerHTML = "";
+  emailView.append(elements.subjectTitle, elements.detailedInfo, elements.replyButton);
 
-    emailView.innerHTML = "";
-    emailView.append(subjectTitle, detailedInfo, replyButton);
+  switch (fromMailbox) {
+    case "inbox":
+      const archiveButton = createButton(`Archive`, "email-btns btn btn-sm btn-outline-info", function() {
+        updateEmailState(id, {archived: true}, "inbox");
+      });
+      emailView.append(archiveButton);
+      break;
+    case "archive":
+      const unarchiveButton = createButton("Move to inbox", "email-btns btn btn-sm btn-outline-info", function() {
+        updateEmailState(id, {archived: false}, "inbox");
+      });
+      emailView.append(unarchiveButton);
+      break;
+  }
 
-    if (fromMailbox === "inbox") {
-        const archiveButton = createButton(`Archive`, "email-btns btn btn-sm btn-outline-info", function() {
-            updateEmailState(id, {archived: true}, "inbox");
-        });
-        emailView.append(archiveButton);
-    } else if (fromMailbox === "archive") {
-        const unarchiveButton = createButton("Move to inbox", "email-btns btn btn-sm btn-outline-info", function() {
-            updateEmailState(id, {archived: false}, "inbox");
-        });
-        emailView.append(unarchiveButton);
-    }
-
-    emailView.append(bodySection);
+  emailView.append(elements.bodySection);
 }
 
 function createButton(textContent, className, clickHandler) {
