@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', function () {
     button.classList.add(addClass);
   }
 
+  // Helper function to capitalize the first letter of a string
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   // Use constants for DOM selectors
   const inboxButton = selectElement('inbox');
   const composeButton = selectElement('compose');
@@ -128,7 +133,7 @@ async function load_mailbox(mailbox) {
   }
 
   // Show the mailbox name
-  emailsView.innerHTML = `<h2 class="mailbox-title">${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h2>`;
+  emailsView.innerHTML = `<h2 class="mailbox-title">${capitalizeFirstLetter(mailbox)}</h2>`;
 
   // Request for emails from the specified mailbox
   const response = await fetch(`/emails/${mailbox}`);
