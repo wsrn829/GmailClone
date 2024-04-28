@@ -1,87 +1,114 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // Use constants for DOM selectors
-  const inboxButton = document.querySelector('#inbox');
-  const composeButton = document.querySelector('#compose');
-  const sentButton = document.querySelector('#sent');
-  const archivedButton = document.querySelector('#archived');
-  const composeForm = document.querySelector('#compose-form');
+  // Function to select DOM elements
+  function selectElement(id) {
+    return document.querySelector(`#${id}`);
+  }
 
-   // Style mailbox buttons
-   const buttons = [inboxButton, sentButton, archivedButton];
-   buttons.forEach(button => {
-     button.classList.remove('btn-primary', 'btn-secondary', 'btn-success');
-     button.classList.add('btn-outline-primary');
-   });
+  // Function to add event listeners to buttons
+  function addButtonListener(button, event, handler) {
+    button.addEventListener(event, handler);
+  }
+
+  // Function to style mailbox buttons
+  function styleButton(button, removeClasses, addClass) {
+    removeClasses.forEach(removeClass => {
+      button.classList.remove(removeClass);
+    });
+    button.classList.add(addClass);
+  }
+
+  // Use constants for DOM selectors
+  const inboxButton = selectElement('inbox');
+  const composeButton = selectElement('compose');
+  const sentButton = selectElement('sent');
+  const archivedButton = selectElement('archived');
+  const composeForm = selectElement('compose-form');
+
+  // Style mailbox buttons
+  const buttons = [inboxButton, sentButton, archivedButton];
+  buttons.forEach(button => {
+    styleButton(button, ['btn-primary', 'btn-secondary', 'btn-info'], 'btn-outline-primary');
+  });
 
   // Use buttons to toggle between views
-  inboxButton.addEventListener('click', () => load_mailbox('inbox'));
-  sentButton.addEventListener('click', () => load_mailbox('sent'));
-  archivedButton.addEventListener('click', () => load_mailbox('archive'));
-  composeButton.addEventListener('click', compose_email);
+  addButtonListener(inboxButton, 'click', () => load_mailbox('inbox'));
+  addButtonListener(sentButton, 'click', () => load_mailbox('sent'));
+  addButtonListener(archivedButton, 'click', () => load_mailbox('archive'));
+  addButtonListener(composeButton, 'click', compose_email);
 
-  document.querySelector('#compose-form').onsubmit = async function(event) {
+  selectElement('compose-form').onsubmit = async function(event) {
     event.preventDefault();
 
     // Gather data from form
-    const recipients = document.querySelector('#compose-recipients').value;
-    const subject = document.querySelector('#compose-subject').value;
-    const body = document.querySelector('#compose-body').value;
+    const recipients = selectElement('compose-recipients').value;
+    const subject = selectElement('compose-subject').value;
+    const body = selectElement('compose-body').value;
 
-   // Send email
-   try {
-    const response = await fetch('/emails', {
-      method: 'POST',
-      body: JSON.stringify({
-        recipients: recipients,
-        subject: subject,
-        body: body
-      })
-    });
-    const result = await response.json();
+    // Send email
+    try {
+      const response = await fetch('/emails', {
+        method: 'POST',
+        body: JSON.stringify({
+          recipients: recipients,
+          subject: subject,
+          body: body
+        })
+      });
+      const result = await response.json();
 
     // Print result
     console.log(result);
 
-    // Load the sent mailbox
-    load_mailbox('sent');
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
+      // Load the sent mailbox
+      load_mailbox('sent');
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
-   // Load the inbox by default when the page loads
-   load_mailbox('inbox');
+// Load the inbox by default when the page loads
+load_mailbox('inbox');
 
 
 // Define compose_email function globally
 function compose_email(event, recipients = '', subject = '', body = '') {
+  // Define a function to hide or show an element
+  const displayElement = (element, display) => {
+    element.style.display = display;
+  };
+
+  // Store the elements in an object
+  const elements = {
+    emailsView: selectElement('emails-view'),
+    composeView: selectElement('compose-view'),
+    emailView: selectElement('email-view'),
+    composeRecipients: selectElement('compose-recipients'),
+    composeSubject: selectElement('compose-subject'),
+    composeBody: selectElement('compose-body')
+  };
+
   // Show compose view and hide other views
-  const emailsView = document.querySelector('#emails-view');
-  const composeView = document.querySelector('#compose-view');
-  const emailView = document.querySelector('#email-view');
-  const composeRecipients = document.querySelector('#compose-recipients');
-  const composeSubject = document.querySelector('#compose-subject');
-  const composeBody = document.querySelector('#compose-body');
+  displayElement(elements.emailsView, 'none');
+  displayElement(elements.composeView, 'block');
+  displayElement(elements.emailView, 'none');
 
-  emailsView.style.display = 'none';
-  composeView.style.display = 'block';
-  emailView.style.display = 'none';
+  // Set the values of the compose form
+  elements.composeRecipients.value = recipients;
+  elements.composeSubject.value = subject;
+  elements.composeBody.value = body;
 
-  composeRecipients.value = recipients;
-  composeSubject.value = subject;
-  composeBody.value = body;
-
-  (body.length > 0 ? composeBody : composeRecipients).focus();
+  // Focus on the body if it's not empty, otherwise focus on the recipients
+  (body.length > 0 ? elements.composeBody : elements.composeRecipients).focus();
 }
 
 async function load_mailbox(mailbox) {
   // Use constants for DOM selectors
-  const emailsView = document.querySelector('#emails-view');
-  const composeView = document.querySelector('#compose-view');
-  const emailView = document.querySelector('#email-view');
-  const inboxButton = document.querySelector('#inbox');
-  const sentButton = document.querySelector('#sent');
-  const archivedButton = document.querySelector('#archived');
+  const emailsView = selectElement('emails-view');
+  const composeView = selectElement('compose-view');
+  const emailView = selectElement('email-view');
+  const inboxButton = selectElement('inbox');
+  const sentButton = selectElement('sent');
+  const archivedButton = selectElement('archived');
 
   // Show the mailbox and hide other views
   emailsView.style.display = 'block';
@@ -97,7 +124,7 @@ async function load_mailbox(mailbox) {
     sentButton.classList.add('btn-secondary');
   } else {
     archivedButton.classList.remove('btn-outline-primary');
-    archivedButton.classList.add('btn-success');
+    archivedButton.classList.add('btn-info');
   }
 
   // Show the mailbox name
@@ -166,82 +193,86 @@ async function load_mailbox(mailbox) {
 }
 
   function loadEmail(emailData, fromMailbox) {
-    const emailsView = document.querySelector('#emails-view');
-    const composeView = document.querySelector('#compose-view');
-    const emailView = document.querySelector('#email-view');
+    const { subject, timestamp, sender, body, recipients, id } = emailData;
+
+    const emailsView = selectElement('emails-view');
+    const composeView = selectElement('compose-view');
+    const emailView = selectElement('email-view');
 
     emailsView.style.display = 'none';
     composeView.style.display = 'none';
     emailView.style.display = 'block';
 
     const subjectTitle = document.createElement("div");
-    subjectTitle.innerHTML = emailData.subject;
+    subjectTitle.textContent = subject;
     subjectTitle.className = 'subject-title';
 
     const detailedInfo = document.createElement("div");
     detailedInfo.className = 'detailed-info';
     detailedInfo.innerHTML = `
         <div>
-            <span class="text-muted">From: </span>${emailData.sender}
-            <span class="text-muted timestamp">${emailData.timestamp}</span>
+            <span class="text-muted">From: </span>${sender}
+            <span class="text-muted timestamp">${timestamp}</span>
         </div>
         <div>
-            <span class="text-muted">To: </span>${emailData.recipients.join()}
+            <span class="text-muted">To: </span>${recipients.join()}
         </div>
         <div>
-            <span class="text-muted">Subject: </span>${emailData.subject}
+            <span class="text-muted">Subject: </span>${subject}
         </div>
     `;
 
     const bodySection = document.createElement("div");
-    bodySection.innerText = emailData.body;
+    bodySection.textContent = body;
     bodySection.className = 'body-section';
 
-    const { subject, timestamp, sender, body } = emailData;
+    const replyButton = createButton(`Reply`, "email-btns btn btn-sm btn-outline-secondary", function(event) {
+        let replySubject = subject.startsWith("Re: ") ? subject : `Re: ${subject}`;
+        let replyBody = `On ${timestamp} <${sender}> wrote:\n${body}\n-------------------------\n`;
+        compose_email(event, sender, replySubject, replyBody);
+    });
 
-const replyButton = createButton(`Reply`, "email-btns btn btn-sm btn-outline-secondary", function(event) {
-    let replySubject = subject.startsWith("Re: ") ? subject : `Re: ${subject}`;
-    let replyBody = `On ${timestamp} <${sender}> wrote:\n${body}\n-------------------------\n`;
-    compose_email(event, sender, replySubject, replyBody);
-});
-
-emailView.innerHTML = "";
-emailView.append(subjectTitle, detailedInfo, replyButton);
+    emailView.innerHTML = "";
+    emailView.append(subjectTitle, detailedInfo, replyButton);
 
     if (fromMailbox === "inbox") {
-        const archiveButton = createButton(`Archive`, "email-btns btn btn-sm btn-outline-warning", function() {
-            updateEmailState(emailData.id, {archived: true}, "inbox");
+        const archiveButton = createButton(`Archive`, "email-btns btn btn-sm btn-outline-info", function() {
+            updateEmailState(id, {archived: true}, "inbox");
         });
         emailView.append(archiveButton);
     } else if (fromMailbox === "archive") {
-        const unarchiveButton = createButton("Move to inbox", "email-btns btn btn-sm btn-outline-danger", function() {
-            updateEmailState(emailData.id, {archived: false}, "inbox");
+        const unarchiveButton = createButton("Move to inbox", "email-btns btn btn-sm btn-outline-info", function() {
+            updateEmailState(id, {archived: false}, "inbox");
         });
         emailView.append(unarchiveButton);
     }
 
     emailView.append(bodySection);
-  }
+}
 
-  function createButton(innerHtml, className, clickHandler) {
-    const button = document.createElement("button");
-    button.innerHTML = innerHtml;
-    button.className = className;
-    button.addEventListener('click', clickHandler);
-    return button;
-  }
+function createButton(textContent, className, clickHandler) {
+  const button = document.createElement("button");
+  button.textContent = textContent;
+  button.className = className;
+  addButtonListener(button, 'click', clickHandler);
+  return button;
+}
 
-  async function updateEmailState(emailId, state, mailbox) {
-    try {
-      const response = await fetch(`/emails/${emailId}`, {
-        method: 'PUT',
-        body: JSON.stringify(state)
-      });
+async function updateEmailState(emailId, state, mailbox) {
+  try {
+    const response = await fetch(`/emails/${emailId}`, {
+      method: 'PUT',
+      body: JSON.stringify(state)
+    });
 
-      console.log(`${response.status}`);
-      await load_mailbox(mailbox);
-    } catch (error) {
-      console.error("Error:", error);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    console.log(`${response.status}`);
+    await load_mailbox(mailbox);
+  } catch (error) {
+    console.error("Error:", error);
   }
+}
 });
